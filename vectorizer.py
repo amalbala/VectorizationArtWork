@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import quantization
+import vectorfile
 
 #Load Image
 image = cv2.imread("./Input/artwork01.jpg")
@@ -12,13 +13,14 @@ cluster = quantization.quatization_colors(image)
 image_q = quantization.generate_quantized_image(image, cluster)
 cv2.imshow('imageQuantized', image_q)
 
+#Remove Background
 first_pixel = image_q[0, 0]
 background = [0,0,0]
 image_qbw = image_q.copy()
 print(first_pixel)
 image_qbw[np.where((image_q == first_pixel).all(axis=2))] = background
 
-cv2.imshow('imageQuantizedBN', image_qbw)
+cv2.imshow('imageQuantizedNoBackground', image_qbw)
 
 #Create a binary image
 (thres, image_bw) = cv2.threshold(image_qbw, 1, 255, cv2.THRESH_BINARY)
@@ -41,7 +43,7 @@ image_contours = np.zeros((image.shape[0], image.shape[1], 3), np.uint8)
 cv2.drawContours(image_contours, contours, -1, (255, 255, 255), 1)
 cv2.imshow('imageContours', image_contours)
 
-savetosvg(image_q,contours,first_pixel)
+vectorfile.savetosvg(image_q,contours,first_pixel)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

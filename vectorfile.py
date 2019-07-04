@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 
 def bincount_app(a):
@@ -16,7 +17,7 @@ def findinnercolor(image, contour):
 
 
 def savetosvg (image, contours, background):
-    f = open('path.svg', 'w+')
+    f = open('FinalResult.svg', 'w+')
     f.write('<svg width="' + str(image.shape[1])
             + '" height="' + str(image.shape[0])
             + '" xmlns="http://www.w3.org/2000/svg">')
