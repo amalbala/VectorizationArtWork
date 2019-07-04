@@ -28,7 +28,7 @@ def quatization_colors(image):
         clt.fit(vector)
         ratio = (previous_res.inertia_ - clt.inertia_)/previous_res.inertia_
         results.append(ratio)
-        if ratio < 0.2:
+        if ratio < 0.3:
             break
         else:
             previous_res = clt
