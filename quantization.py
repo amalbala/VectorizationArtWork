@@ -87,3 +87,12 @@ def generate_quantized_image(image, clusters):
 
     image_quant = vector.reshape(image.shape[0], image.shape[1], 3)
     return cv2.cvtColor(image_quant, cv2.COLOR_RGB2BGR)
+
+def generate_quantized_imageBW(image, clusters, label):
+    imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    vector = imageRGB.reshape((image.shape[0] * image.shape[1], 3))
+    for i in range(vector.shape[0]):
+        vector[i] = [255, 255, 255] if clusters.labels_[i] == label else [0, 0, 0]
+
+    image_quant = vector.reshape(image.shape[0], image.shape[1], 3)
+    return cv2.cvtColor(image_quant, cv2.COLOR_RGB2BGR)

@@ -30,7 +30,9 @@ def savetosvg (image, contours, background):
         for i in range(len(contour)):
             x, y = contour[i][0]
             f.write(str(x) + ' ' + str(y) + ' ')
-        f.write('Z" fill ="rgb(' + str(color[2]) + ',' + str(color[1]) + ',' + str(color[0]) + ')"')
+        f.write('Z" ')
+        f.write('fill ="rgb(' + str(color[2]) + ',' + str(color[1]) + ',' + str(color[0]) + ')" ')
+        f.write('stroke ="rgb(' + str(color[2]) + ',' + str(color[1]) + ',' + str(color[0]) + ')" ')
         f.write('/>')
     f.write('</svg>')
     f.close()
