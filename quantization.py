@@ -5,9 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plot
 
 
-def plotOptimarColors(image):
+def plotOptimalColors(image):
     results = quatization_colors(image)
-    print(results)
     plot.plot(range(1, 20), results, 'bx-')
     plot.xlabel('k')
     plot.ylabel('Sum_of_squared_distances')
@@ -33,7 +32,6 @@ def quatization_colors(image):
         else:
             previous_res = clt
 
-    print(results)
     return previous_res
 
 

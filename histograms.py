@@ -51,7 +51,7 @@ def hist_H_calculation(image):
     return h_hist
 
 def count_colors(image):
-    h_hist = histograms.hist_H_calculation(image)
+    h_hist = hist_H_calculation(image)
     res = sum(map(lambda i: i > 100, h_hist))
     return res
 

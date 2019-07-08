@@ -16,8 +16,8 @@ def findinnercolor(image, contour):
     return bincount_app(colors)
 
 
-def savetosvg (image, contours, background):
-    f = open('FinalResult.svg', 'w+')
+def savetosvg (image, contours, background, filename):
+    f = open(filename + '.svg', 'w+')
     f.write('<svg width="' + str(image.shape[1])
             + '" height="' + str(image.shape[0])
             + '" xmlns="http://www.w3.org/2000/svg">')
