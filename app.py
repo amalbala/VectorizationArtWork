@@ -14,7 +14,6 @@ app.add_url_rule(
     )
 )
 
-
 @app.route('/')
 def index():
     return '<p> Hello World</p>'
