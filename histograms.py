@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 
-def histCalculation_BGR (image):
+def histCalculation_BGR (image, rangemin= 0, rangemax= 256, size=256):
     bgr_planes = cv2.split(image)
-    hist_size = 256
-    hist_range = (0, 256)  # the upper boundary is exclusive
+    hist_size = size
+    hist_range = (rangemin, rangemax)  # the upper boundary is exclusive
     accumulate = False
     b_hist = cv2.calcHist(bgr_planes, [0], None, [hist_size], hist_range, accumulate=accumulate)
     g_hist = cv2.calcHist(bgr_planes, [1], None, [hist_size], hist_range, accumulate=accumulate)
@@ -55,3 +56,11 @@ def count_colors(image):
     res = sum(map(lambda i: i > 100, h_hist))
     return res
 
+def histPlot(image, rangemin= 0, rangemax= 256, size=256):
+    color = ('b', 'g', 'r')
+    for i, col in enumerate(color):
+        histr = cv2.calcHist([image], [i], None, [size], [rangemin, rangemax])
+        print("Color: " + col + " Size: " + str(len(histr)))
+        plt.plot(histr, color=col)
+        plt.xlim([0, rangemax - rangemin])
+    plt.show()
