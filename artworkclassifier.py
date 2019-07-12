@@ -1,12 +1,13 @@
 import cv2
-import os, shutil
-import numpy as np
-import histograms
+import os
+import shutil
 from keras import layers, models, optimizers
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import CSVLogger
 import matplotlib.pyplot as plt
 import pandas as pd
+import histograms
+import numpy as np
 
 
 class ArtworkClassifier:
@@ -24,6 +25,40 @@ class ArtworkClassifier:
     @classmethod
     def fromfile(cls, path, name):
         return cls(cv2.imread(os.path.join(path,name)))
+
+    def plotHistogramMomentums(self):
+
+        horizdifkernel = np.array([1, -1])
+        vertdifkernel = np.array([[1], [-1]])
+        diagdifKernel = np.array([[1, 0], [0, -1]])
+        antidiagdifKernel = np.array([[0, 1], [-1, 0]])
+        kernels = [horizdifkernel, vertdifkernel, diagdifKernel, antidiagdifKernel]
+        imagesdif = []
+        # First order differences
+        for kernel in kernels:
+            imageresidual = cv2.filter2D(self.image, ddepth=cv2.CV_32F, kernel=kernel)
+            imagesdif.append(imageresidual)
+
+        # Second order differences
+        for i in range(len(kernels)):
+            for j in range (i, len(kernels)):
+                imagerfirst = cv2.filter2D(self.image, ddepth=cv2.CV_32F, kernel=kernels[i])
+                imageresidual = cv2.filter2D(imagerfirst, ddepth=cv2.CV_32F, kernel=kernels[j])
+                imagesdif.append(imageresidual)
+
+        print("Images Generated:  " + str(len(imagesdif)))
+
+        eqh_b, eqh_r, eqh_g  = histograms.histCalculation_BGR(imageresidual,
+                                                              size=512,
+                                                              rangemin=-255,
+                                                              rangemax=255)
+
+        imagesize = (self.image.shape[0] * self.image.shape[1])
+
+        eqh_b /= imagesize
+        eqh_r /= imagesize
+        eqh_g /= imagesize
+        histograms.histPlot(imageresidual, size=512, rangemin=-255, rangemax=255)
 
     def generateDataForOneClass(self, originalpath, label, trainsize, validationsize, testsize):
 
@@ -115,10 +150,7 @@ class ArtworkClassifier:
             class_mode='binary'
         )
 
-
-
         csv_logger = CSVLogger('ArtvectorClassiferTraining.log', separator=',', append=False)
-
 
         history = model.fit_generator(
             train_generator,
@@ -158,72 +190,19 @@ class ArtworkClassifier:
 
         plt.show()
 
-
     def generateCNNClasifier(self):
-        self.createDirectories()
+        # self.createDirectories()
         self.generateModel()
         self.plottraining()
 
-
     def isartwork(self):
-
-        # self.generateCNNClasifier()
-
         model = models.load_model('ArtvectorClassifer.h5')
 
-        test_datagen = ImageDataGenerator(rescale=1. / 255)
+        image_resized = cv2.resize(self.image, (150, 150))
+        imagenorm = image_resized / 255.
+        imageexpand = np.expand_dims(imagenorm, axis=0)
+        prediction = model.predict(imageexpand)
 
-        test_generator = test_datagen.flow_from_directory(
-            self.test_dir,
-            shuffle=False,
-            target_size=(150, 150),
-            batch_size=20,
-            class_mode='binary'
-        )
-
-        test_generator.reset()
-
-        filenames = test_generator.filenames
-
-        prediction_artwork = model.predict_generator(
-            test_generator,
-            steps=50)
-
-        prediction_filenames = [('Real Photo' if prediction_artwork[i] > 0.5 else 'ArtWork', prediction_artwork[i], filenames[i]) for i in range(len(filenames)) ]
-
-        prediction = pd.DataFrame(prediction_filenames, columns=['Class', 'Prediction', 'filenames']).to_csv('prediction.csv')
-
-        # horizdifkernel = np.array([1, -1])
-        # vertdifkernel = np.array([[1], [-1]])
-        # diagdifKernel = np.array([[1, 0], [0, -1]])
-        # antidiagdifKernel = np.array([[0, 1], [-1, 0]])
-        # kernels = [horizdifkernel, vertdifkernel, diagdifKernel, antidiagdifKernel]
-        # imagesdif = []
-        # # First order differences
-        # for kernel in kernels:
-        #     imageresidual = cv2.filter2D(self.image, ddepth=cv2.CV_32F, kernel=kernel)
-        #     imagesdif.append(imageresidual)
-        #
-        # # Second order differences
-        # for i in range(len(kernels)):
-        #     for j in range (i, len(kernels)):
-        #         imagerfirst = cv2.filter2D(self.image, ddepth=cv2.CV_32F, kernel=kernels[i])
-        #         imageresidual = cv2.filter2D(imagerfirst, ddepth=cv2.CV_32F, kernel=kernels[j])
-        #         imagesdif.append(imageresidual)
-        #
-        # print("Images Generated:  " + str(len(imagesdif)))
-        #
-        # eqh_b, eqh_r, eqh_g  = histograms.histCalculation_BGR(imageresidual,
-        #                                                       size=512,
-        #                                                       rangemin=-255,
-        #                                                       rangemax=255)
-        #
-        # imagesize = (self.image.shape[0] * self.image.shape[1])
-        #
-        # eqh_b /= imagesize
-        # eqh_r /= imagesize
-        # eqh_g /= imagesize
-        # histograms.histPlot(imageresidual, size=512, rangemin=-255, rangemax=255)
-
-        return True
+        print(prediction)
+        return prediction <= 0.5
 
