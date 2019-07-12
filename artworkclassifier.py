@@ -172,12 +172,16 @@ class ArtworkClassifier:
         model = models.load_model('ArtvectorClassifer.h5')
 
         test_datagen = ImageDataGenerator(rescale=1. / 255)
+
         test_generator = test_datagen.flow_from_directory(
-            self.validation_dir,
+            self.test_dir,
+            shuffle=False,
             target_size=(150, 150),
             batch_size=20,
             class_mode='binary'
         )
+
+        test_generator.reset()
 
         filenames = test_generator.filenames
 
@@ -185,9 +189,9 @@ class ArtworkClassifier:
             test_generator,
             steps=50)
 
-        prediction_filenames = [(prediction_artwork[i], filenames[i]) for i in range(len(filenames)) ]
+        prediction_filenames = [('Real Photo' if prediction_artwork[i] > 0.5 else 'ArtWork', prediction_artwork[i], filenames[i]) for i in range(len(filenames)) ]
 
-        prediction = pd.DataFrame(prediction_filenames, columns=['predictions', 'filenames']).to_csv('prediction.csv')
+        prediction = pd.DataFrame(prediction_filenames, columns=['Class', 'Prediction', 'filenames']).to_csv('prediction.csv')
 
         # horizdifkernel = np.array([1, -1])
         # vertdifkernel = np.array([[1], [-1]])
